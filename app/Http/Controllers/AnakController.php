@@ -28,7 +28,22 @@ class AnakController extends Controller
         $alamat = $request->input('alamat');
         $kelurahan = $request->input('kelurahan');
 
+        $phonecheck = Anak::wherePhone($phone)->first();
+        $nokkCheck = Anak::whereno_kk($no_kk)->first();
 
+        if ($nokkCheck) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No. KK yang anda masukan telah terdaftar',
+            ], 401);
+        }
+
+        if ($phonecheck) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No. HP yang anda masukan telah terdaftar',
+            ], 401);
+        }
 
         $insert = Anak::create([
             'nama_ayah' => $name_ayah,
