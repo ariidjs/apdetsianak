@@ -20,7 +20,7 @@ class CreateGrowAnaksTable extends Migration
             $table->string('tmpt_ukur');
             $table->string('tinggi');
             $table->string('berat');
-            $table->string('lingkar_kepala');
+            $table->string('lingkar_kepala')->nullable();
             $table->string('lingkar_lengan');
             $table->timestamps();
         });

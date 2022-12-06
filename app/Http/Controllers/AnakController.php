@@ -145,8 +145,7 @@ class AnakController extends Controller
         if ($insert) {
             return response()->json([
                 'success' => true,
-                'message' => 'Sukses tambah data anak',
-                'identitasdata' => $insert
+                'message' => 'Sukses tambah data anak'
             ], 201);
         } else {
             return response()->json([
@@ -196,7 +195,7 @@ class AnakController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Sukses tambah data pertumbuhan anak',
-                'growdata' => $insert
+                'nik' => $nik
             ], 201);
         } else {
             return response()->json([

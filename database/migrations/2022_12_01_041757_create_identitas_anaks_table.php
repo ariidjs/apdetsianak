@@ -18,7 +18,7 @@ class CreateIdentitasAnaksTable extends Migration
             $table->string("no_kk");
             $table->string("nik")->unique();
             $table->string("nama");
-            $table->smallInteger("j_kelamin");
+            $table->string("j_kelamin");
             $table->string("ttl");
             $table->string("umur");
             $table->string("alamat");
