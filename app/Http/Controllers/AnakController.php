@@ -6,6 +6,9 @@ use App\Models\GrowAnak;
 use App\Models\IdentitasAnak;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use PhpOffice\PhpSpreadsheet\Exception;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xls;
 
 class AnakController extends Controller
 {
@@ -67,6 +70,44 @@ class AnakController extends Controller
                 'message' => 'failed'
             ], 400);
         }
+    }
+
+    public function updatePassword($no_kk, Request $request) {
+        $currentpassword = $request->input('current');
+        $data = Anak::whereno_kk($no_kk)->first();
+        $password = $request->input('password');
+        $c_password = $request->input('c_password');
+        $checkCurrent = Hash::check($currentpassword, $data->password);
+
+        if(!$checkCurrent) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password lama anda salah!'
+            ], 401);
+        }
+        if($password != $c_password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Password tidak sama!'
+            ], 401);
+        }
+
+        $updated = Anak::whereno_kk($no_kk)->update([
+            "password" => Hash::make($password)
+        ]);
+
+        if ($updated) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Sukses ubah password!'
+            ], 201);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal ubah password!',
+            ], 401);
+        }
+
     }
 
     public function login(Request $request)
@@ -222,4 +263,44 @@ class AnakController extends Controller
             ], 404);
         }
     }
+
+    public function ExportExcel($data){
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '4000M');
+        try {
+            $spreadSheet = new Spreadsheet();
+            $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
+            $spreadSheet->getActiveSheet()->fromArray($data);
+            $Excel_writer = new Xls($spreadSheet);
+            header('Content-Type: application/vnd.ms-excel');
+            header('Content-Disposition: attachment;filename="Anak_ExportedData.xls"');
+            header('Cache-Control: max-age=0');
+            ob_end_clean();
+            $Excel_writer->save('php://output');
+            exit();
+        } catch (Exception $e) {
+            return;
+        }
+    }
+
+    function exportData($nik){
+        $data = GrowAnak::wherenik($nik)->orderBy('created_at', 'ASC')->get();
+        $idennama = IdentitasAnak::wherenik($nik)->first();
+        $data_array [] = array("Nama","Tanggal Pengukuran","Tempat Pengukuran","Tinggi Badan","Berat Badan","Lingkar Kepala","Lingkar Lengan");
+        
+        foreach($data as $data_item)
+        {
+            $data_array[] = array(
+                'Nama' =>$idennama->nama,
+                'Tanggal Pengukuran' => $data_item->tgl_ukur,
+                'Tempat Pengukuran' => $data_item->tmpt_ukur,
+                'Tinggi Badan' => $data_item->tinggi,
+                'Berat Badan' => $data_item->berat,
+                'Lingkar Kepala' =>$data_item->lingkar_kepala,
+                'Lingkar Lengan' =>$data_item->lingkar_lengan
+            );
+        }
+        $this->ExportExcel($data_array);
+    }
+ 
 }

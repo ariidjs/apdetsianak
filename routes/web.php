@@ -18,11 +18,14 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('/grow/{nik}','AnakController@getHistory');
     $router->post('/login', 'AnakController@login');
     $router->post('/identitasanak/{no_kk}', 'AnakController@insertIdentitasAnak');
+    $router->post('/changepassword/{no_kk}', 'AnakController@updatePassword');
     $router->get('/identitasanak/{no_kk}', 'AnakController@getAnaks');
     $router->post('/signUp', 'AnakController@insert');
+    $router->get('/', function () use ($router) {
+        return $router->app->version();
+    });
+    $router->get('/export/{nik}', 'AnakController@exportData');
 });
 
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
+
