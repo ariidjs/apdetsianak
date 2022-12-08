@@ -24,7 +24,11 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('/', function () use ($router) {
         return $router->app->version();
     });
-    $router->get('/export/{nik}', 'AnakController@exportData');
+});
+
+
+$router->group(['prefix' => '/'], function () use ($router) {
+    $router->get('export/{nik}', 'AnakController@exportData');
 });
 
 
