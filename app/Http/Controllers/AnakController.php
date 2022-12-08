@@ -264,7 +264,7 @@ class AnakController extends Controller
         }
     }
 
-    public function ExportExcel($data){
+    public function ExportExcel($data,$nik){
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '4000M');
         try {
@@ -273,7 +273,7 @@ class AnakController extends Controller
             $spreadSheet->getActiveSheet()->fromArray($data);
             $Excel_writer = new Xls($spreadSheet);
             header('Content-Type: application/vnd.ms-excel');
-            header('Content-Disposition: attachment;filename="Anak_ExportedData.xls"');
+            header('Content-Disposition: attachment;filename='.$nik.'_pertumbuhan_anak.xls');
             header('Cache-Control: max-age=0');
             ob_end_clean();
             $Excel_writer->save('php://output');
@@ -300,7 +300,7 @@ class AnakController extends Controller
                 'Lingkar Lengan' =>$data_item->lingkar_lengan
             );
         }
-        $this->ExportExcel($data_array);
+        $this->ExportExcel($data_array,$nik);
     }
  
 }
