@@ -265,18 +265,19 @@ class AnakController extends Controller
     }
 
     public function ExportExcel($data,$nik){
+        ob_start();
         ini_set('max_execution_time', 0);
         ini_set('memory_limit', '4000M');
         try {
             $spreadSheet = new Spreadsheet();
             $spreadSheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(20);
             $spreadSheet->getActiveSheet()->fromArray($data);
-            $Excel_writer = new Xls($spreadSheet);
+            $excel_writer = new Xls($spreadSheet);
             header('Content-Type: application/vnd.ms-excel');
             header('Content-Disposition: attachment;filename='.$nik.'_pertumbuhan_anak.xls');
             header('Cache-Control: max-age=0');
             ob_end_clean();
-            $Excel_writer->save('php://output');
+            $excel_writer->save('php://output');
             exit();
         } catch (Exception $e) {
             return;
