@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 use App\Models\Anak;
 use App\Models\GrowAnak;
 use App\Models\IdentitasAnak;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -19,7 +21,48 @@ class AnakController extends Controller
      */
     public function __construct()
     {
-        //
+        $this->middleware('auth:api', ['except' => ['login','loginJwt','insert','exportData']]);
+    }
+
+    public function loginJwt(Request $request)
+    {
+
+        $username = $request->input('username');
+        $password = $request->input('password');
+
+        $data = Anak::whereno_kk($username)->first();
+        $user = User::whereusername($username)->first();
+        $credentials = $request->only(['username', 'password']);
+        if ($user) {
+            
+            if (Hash::check($password, $user->password)) {
+                $myTTL = 60* 60 * 24; //minutes
+
+                Auth::factory()->setTTL($myTTL);
+            
+                if (!$token = Auth::attempt($credentials)) {
+                    return response()->json(['message' => 'Unauthorized'], 401);
+                }
+        
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login Berhasil!',
+                    'logindata' =>$data,
+                    'token' => $token
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password yang anda masukan salah',
+                ], 404);
+            }
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email atau username yang anda masukan tidak tersedia',
+            ], 404);
+        }
+        
     }
 
     public function insert(Request $request)
@@ -48,6 +91,11 @@ class AnakController extends Controller
             ], 401);
         }
 
+        $user = User::create([
+            'username' => $no_kk,
+            'password' => Hash::make($no_kk),
+        ]);
+
         $insert = Anak::create([
             'nama_ayah' => $name_ayah,
             'nama_ibu' => $nama_ibu,
@@ -58,7 +106,7 @@ class AnakController extends Controller
             'kelurahan' => $kelurahan,
         ]);
 
-        if ($insert) {
+        if ($insert && $user) {
             return response()->json([
                 'success' => true,
                 'message' => 'success',
@@ -72,9 +120,19 @@ class AnakController extends Controller
         }
     }
 
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'user' => auth()->user(),
+            'expires_in' => auth()->factory()->getTTL() * 60 * 24
+        ]);
+    }
+
     public function updatePassword($no_kk, Request $request) {
         $currentpassword = $request->input('current');
-        $data = Anak::whereno_kk($no_kk)->first();
+        $data = User::whereusername($no_kk)->first();
         $password = $request->input('password');
         $c_password = $request->input('c_password');
         $checkCurrent = Hash::check($currentpassword, $data->password);
@@ -92,7 +150,7 @@ class AnakController extends Controller
             ], 401);
         }
 
-        $updated = Anak::whereno_kk($no_kk)->update([
+        $updated = User::whereusername($no_kk)->update([
             "password" => Hash::make($password)
         ]);
 
@@ -114,44 +172,38 @@ class AnakController extends Controller
     {
         $username = $request->input('username');
         $password = $request->input('password');
-        $type = $request->input('type'); //type 1 = anak, 2 = petugas
-        $data = Anak::whereno_kk($username)->first();
 
-        if($type == 1) {
-            if ($data) {
-                if (Hash::check($password, $data->password)) {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Login Berhasil!',
-                        'logindata' => $data,
-                    ], 200);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Password yang anda masukan salah',
-                    ], 404);
+        $data = Anak::whereno_kk($username)->first();
+        $user = User::whereusername($username)->first();
+        $credentials = $request->only(['username', 'password']);
+        if ($user) {
+            
+            if (Hash::check($password, $user->password)) {
+                $myTTL = 60* 60 * 24; //minutes
+
+                Auth::factory()->setTTL($myTTL);
+            
+                if (!$token = Auth::attempt($credentials)) {
+                    return response()->json(['message' => 'Unauthorized'], 401);
                 }
+        
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login Berhasil!',
+                    'logindata' =>$data,
+                    'token' => $token
+                ]);
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Email atau username yang anda masukan tidak tersedia',
+                    'message' => 'Password yang anda masukan salah',
                 ], 404);
             }
-        }else {
-            
-                if ($username == 'admin' &&$password == 'admin') {
-                    return response()->json([
-                        'success' => true,
-                        'message' => 'Admin Login Berhasil',
-                        'logindata' => $data,
-                    ], 200);
-                } else {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Username & Password yang anda masukan salah',
-                    ], 404);
-                }
-           
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email atau username yang anda masukan tidak tersedia',
+            ], 404);
         }
     }
 

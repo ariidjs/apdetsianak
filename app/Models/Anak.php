@@ -19,7 +19,7 @@ class Anak extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'nama_ayah', 'nama_ibu','no_kk','phone','alamat','kelurahan','password'
+        'nama_ayah', 'nama_ibu','no_kk','phone','alamat','kelurahan'
     ];
 
     /**
@@ -28,6 +28,6 @@ class Anak extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $hidden = [
-        'password',
+        '',
     ];
 }

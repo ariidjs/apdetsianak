@@ -21,7 +21,6 @@ class CreateAnaksTable extends Migration
                 $table->string("phone")->unique();
                 $table->string("alamat");
                 $table->string("kelurahan");
-                $table->string("password");
                 $table->timestamps();
         });
     }

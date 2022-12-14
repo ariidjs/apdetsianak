@@ -22,8 +22,9 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     $router->get('/identitasanak/{no_kk}', 'AnakController@getAnaks');
     $router->post('/signUp', 'AnakController@insert');
     $router->get('/', function () use ($router) {
-        return $router->app->version();
+        return 'FORBIDDEN PLACE! GET OUT!';
     });
+    // $router->post('/insertAdmin', 'AuthController@insert');
 });
 
 
